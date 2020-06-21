@@ -1,28 +1,33 @@
 // for budget control
 var budgetController = (() => {
 
-    var Expense = function (id, description, value) {
-        this.id = id;
-        this.description = description;
-        this.value = value;
-        this.percentage = -1
-    }
-    Expense.prototype.calcPercentages = function (totalIncome) {
-        if (totalIncome > 0) {
-            this.percentage = Math.round((this.value / totalIncome) * 100)
-        } else {
-            this.percentage = -1
+    class Expense {
+        constructor(id, description, value) {
+            this.id = id;
+            this.description = description;
+            this.value = value;
+            this.percentage = -1;
+        }
+        calcPercentages(totalIncome) {
+            if (totalIncome > 0) {
+                this.percentage = Math.round((this.value / totalIncome) * 100);
+            }
+            else {
+                this.percentage = -1;
+            }
+        }
+        getPercentage() {
+            return this.percentage;
         }
     }
 
-    Expense.prototype.getPercentage = function () {
-        return this.percentage
-    }
 
-    var Income = function (id, description, value) {
-        this.id = id;
-        this.description = description;
-        this.value = value;
+    class Income {
+        constructor(id, description, value) {
+            this.id = id;
+            this.description = description;
+            this.value = value;
+        }
     }
 
     var calculateTotal = (type) => {
@@ -173,7 +178,6 @@ var UIController = (() => {
                 description: document.querySelector(DOMStrings.inputDescription).value,
                 value: parseFloat(document.querySelector(DOMStrings.inputValue).value)
             }
-
         },
         addListItem: function (obj, type) {
             var html, newHtml, element;
@@ -224,8 +228,7 @@ var UIController = (() => {
 
         displayPercentages: function (percentages) {
             var fields = document.querySelectorAll(DOMStrings.expensePercentageLabel);
-
-            nodeListForEach(fields, function (current, index) {
+            fields.forEach((current,index)=>{
                 if (percentages[index] > 0) {
                     current.textContent = percentages[index] + '%'
                 } else {
@@ -244,20 +247,21 @@ var UIController = (() => {
             month = now.getMonth();
             year = now.getFullYear();
             document.querySelector(DOMStrings.month).textContent = date + ' ' + months[month] + ' ' + year
-
         },
 
-        changeType: function () {
+        changeType: function() {
+            
             var fields = document.querySelectorAll(
-                DOMStrings.inputType + ',' +     
+                DOMStrings.inputType + ',' +
                 DOMStrings.inputDescription + ',' +
-                DOMStrings.inputValue
-            )
-            nodeListForEach(fields, function (cur) {
-              var fields =  cur.classList.toggle('red-focus')
-           console.log(fields)
+                DOMStrings.inputValue);
+            
+            fields.forEach(el=>{
+                el.classList.toggle("red-focus")
             })
-            document.querySelector(DOMStrings.inputBtn).classList.toggle('red')
+            
+            document.querySelector(DOMStrings.inputBtn).classList.toggle('red');
+            
         },
 
         getDOMStrings: () => {
@@ -279,9 +283,8 @@ var controller = ((budgetCtrl, UICtrl) => {
                 addItem()
             }
         })
-        document.querySelector(DOM.container), addEventListener('click', deleteItem);
-        document.querySelector(DOM.inputType), addEventListener('change', UICtrl.changeType);
-        
+        document.querySelector(DOM.container).addEventListener('click', deleteItem);
+        document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changeType);    
     }
 
     var updatePercentages = () => {
