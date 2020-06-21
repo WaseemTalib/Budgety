@@ -253,9 +253,9 @@ var UIController = (() => {
                 DOMStrings.inputDescription + ',' +
                 DOMStrings.inputValue
             )
-
             nodeListForEach(fields, function (cur) {
-                cur.classList.toggle('red-focus')
+              var fields =  cur.classList.toggle('red-focus')
+           console.log(fields)
             })
             document.querySelector(DOMStrings.inputBtn).classList.toggle('red')
         },

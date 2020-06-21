@@ -24,7 +24,7 @@ body {
 }
 
 .right { float: right; }
-.red { color: #FF5049 !important; }
+.red { color: #FF5049 !important; border: 1px solid #FF5049 !important }
 .red-focus:focus { border: 1px solid #FF5049 !important; }
 
 /**********************************************
@@ -153,9 +153,12 @@ body {
 .add__value { width: 100px;}
 
 .add__btn {
-    font-size: 35px;
+    font-size: 20px;
+    border: 1px solid #28B9B5;
+    padding: 3px;
+    border-radius: 50%; 
     background: none;
-    border: none;
+    /* border: none; */
     color: #28B9B5;
     cursor: pointer;
     display: inline-block;
