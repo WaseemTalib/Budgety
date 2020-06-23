@@ -15,12 +15,12 @@ var budgetController = (() => {
     //         this.percentage = -1;
     //     }
     // };
-
-
+    
+    
     // Expense.prototype.getPercentage = function() {
     //     return this.percentage;
     // };
-
+    
 
     class Expense {
         constructor(id, description, value, type) {
@@ -30,7 +30,7 @@ var budgetController = (() => {
             this.type = type;
             this.percentage = -1;
         }
-        calcPercentages(totalIncome) {
+      calcPercentages(totalIncome) {
             if (totalIncome > 0) {
                 this.percentage = Math.round((this.value / totalIncome) * 100);
             }
@@ -104,7 +104,6 @@ var budgetController = (() => {
         localAdd: function (Type) {
             onChangeExp = () => {
                 var savedExp = [];
-                
                 data.allItems.exp.forEach((el) => {
                     var obj = { ID: el.id, description: el.description, value: el.value, type: Type, };
                     localStorage.removeItem('allItems.exp')
@@ -134,11 +133,9 @@ var budgetController = (() => {
             saved = JSON.parse(localStorage.getItem('allItems.' + type));
 
             ids = saved.map(function (current) {
-                console.log(current)
                 return current.ID
             });
             index = ids.indexOf(id)
-            console.log(index)
             if (index !== -1) {
                 saved.splice(index, 1)
                 localStorage.setItem("allItems." + type, JSON.stringify(saved));
@@ -184,9 +181,9 @@ var budgetController = (() => {
             //         curr.calculatePercentages(incTotals)
             //     })
             // }else{
-            data.allItems.exp.forEach(function (curr) {
-                curr.calcPercentages(data.allItems.inc)
-            })
+                data.allItems.exp.forEach(function (curr) {
+                    curr.calcPercentages(data.allItems.inc)
+                })
             // }
         },
 
@@ -259,6 +256,7 @@ var UIController = (() => {
         return addSign + ' ' + int + '.' + dec
     };
 
+
     return {
         getInput: () => {
             return {
@@ -267,7 +265,6 @@ var UIController = (() => {
                 value: parseFloat(document.querySelector(DOMStrings.inputValue).value)
             }
         },
-
         addListItem: function (obj, type) {
             var html, newHtml, element, local;
             if (type === 'inc') {
@@ -294,21 +291,23 @@ var UIController = (() => {
             localStorage.setItem("types", JSON.stringify(types));
 
         },
-
         loadListItem: function (obj, type) {
             var html, newHtml, element;
-                if (type === 'inc') {
-                    element = DOMStrings.incomeContainer;
-                    html = `<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div>
+            if (type === 'inc') {
+                element = DOMStrings.incomeContainer;
+                html = `<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div>
                 <div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete">
                 <button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
-                } else if (type === 'exp') {
-                    element = DOMStrings.expenseContainer;
-                    html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
+            } else if (type === 'exp') {
+                console.log(type)
+                element = DOMStrings.expenseContainer;
+                html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
                 <div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div>
                 <div class="item__delete"><button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
-                }
+            }
+
             obj.forEach(el => {
+
                 newHtml = html.replace('%id%', el.ID);
 
                 newHtml = newHtml.replace('%description%', el.description);
@@ -433,25 +432,6 @@ var controller = ((budgetCtrl, UICtrl) => {
 
     };
 
-    onReload = () => {
-
-        var mainObj = []
-        var localInc = JSON.parse(localStorage.getItem('allItems.inc'));
-        if (localInc) {
-            localInc.forEach(e => {
-                mainObj.push(e)
-            })
-            UICtrl.loadListItem(mainObj, 'inc')
-        }
-        mainObj = [];
-        var localExp = JSON.parse(localStorage.getItem('allItems.exp'));
-        if (localExp) {
-            localExp.forEach(e => {
-                mainObj.push(e)
-            })
-        }
-        UICtrl.loadListItem(mainObj, 'exp')
-    }
     var deleteItem = function (ev) {
         var itemID, splitID, type, ID;
 
@@ -466,18 +446,16 @@ var controller = ((budgetCtrl, UICtrl) => {
             // 1. delete item from data structure
             budgetCtrl.deleteItem(type, ID)
 
-            // local storage
-            budgetCtrl.localDelete(type, ID)
-        
             // 2. delete item from UI
             UICtrl.deleteItem(itemID)
-            
             // 3. update and show the new budget
             updateBudget();
 
             // 4. calculate and update percentages
             // updatePercentages();
 
+            // local storage
+            budgetCtrl.localDelete(type, ID)
         }
 
     }
@@ -527,7 +505,23 @@ var controller = ((budgetCtrl, UICtrl) => {
                 totalInc: localTotalInc,
                 totalExp: localTotalExp
             })
-            onReload();
+
+            var types = ['inc', 'exp']
+            var localTypes = JSON.parse(localStorage.getItem('types'));
+            if (localTypes) {
+                var mainObj = []
+                types.forEach(el => {
+                    var local = JSON.parse(localStorage.getItem('allItems.' + el));
+                    local.forEach(e => {
+                        console.log(e)
+                        mainObj.push(e)
+
+                    })
+                    UICtrl.loadListItem(mainObj, el)
+
+                });
+            }
+
 
             eventListeners()
         }
