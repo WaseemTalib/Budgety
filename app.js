@@ -1,50 +1,28 @@
 // for budget control
 var budgetController = (() => {
 
-    // var Expense = function(id, description, value, type) {
-    //     this.id = id;
-    //     this.description = description;
-    //     this.value = value;
-    //     this.type = type;
-    //     this.percentage = -1;
-    // };
-    // Expense.prototype.calcPercentage = function(totalIncome) {
-    //     if (totalIncome > 0) {
-    //         this.percentage = Math.round((this.value / totalIncome) * 100);
-    //     } else {
-    //         this.percentage = -1;
-    //     }
-    // };
+    var Expense = function (id, description, value, type) {
+        this.id = id;
+        this.description = description;
+        this.value = value;
+        this.type = type;
+        this.percentage = -1;
+    };
 
 
-    // Expense.prototype.getPercentage = function() {
-    //     return this.percentage;
-    // };
-
-
-    class Expense {
-        constructor(id, description, value, type) {
-            this.id = id;
-            this.description = description;
-            this.value = value;
-            this.type = type;
+    Expense.prototype.calcPercentages = function (totalIncome) {
+        if (totalIncome > 0) {
+            console.log(totalIncome)
+            this.percentage = Math.round((this.value / totalIncome) * 100);
+        } else {
             this.percentage = -1;
         }
-        calcPercentages(totalIncome) {
-            if (totalIncome > 0) {
-                this.percentage = Math.round((this.value / totalIncome) * 100);
-            }
-            else {
-                this.percentage = -1;
-            }
-        }
-
-        getPercentage() {
-            return this.percentage;
-        }
-    }
+    };
 
 
+    Expense.prototype.getPercentage = function () {
+        return this.percentage;
+    };
     class Income {
         constructor(id, description, value, type) {
             this.id = id;
@@ -62,13 +40,13 @@ var budgetController = (() => {
         data.totals[type] = sum;
     }
 
-
     var localAllExp = JSON.parse(localStorage.getItem('allItems.exp'));
     var localAllInc = JSON.parse(localStorage.getItem('allItems.inc'));
     var localTotalExp = JSON.parse(localStorage.getItem('totals.exp'));
     var localTotalInc = JSON.parse(localStorage.getItem('totals.inc'));
     var localBudget = JSON.parse(localStorage.getItem('budget'));
     var localPercentage = JSON.parse(localStorage.getItem('percentage'));
+    var expensesPercentages = JSON.parse(localStorage.getItem('expensesPercentages'))
 
     var data = {
         allItems: {
@@ -79,10 +57,24 @@ var budgetController = (() => {
             exp: localTotalExp ? localTotalExp : 0,
             inc: localTotalInc ? localTotalInc : 0
         },
-        types: [],
         budget: localBudget ? localBudget : 0,
-        percentage: localPercentage ? localPercentage : -1
+        percentage: localPercentage 
     }
+    var reloaded = false
+    location.reload ? reloaded = true : reloaded = false
+    // console.log(reloaded)
+    if(reloaded === true){
+
+        if (data.allItems.exp) {
+            if (expensesPercentages) {
+                data.allItems.exp[data.allItems.exp.length - 1] = expensesPercentages[expensesPercentages.length - 1]
+            }
+        }
+    }else{
+        console.log('not at all')
+    }
+  
+  
     return {
         addItem: function (type, description, value) {
             var newItem, ID;
@@ -103,10 +95,11 @@ var budgetController = (() => {
 
         localAdd: function (Type) {
             onChangeExp = () => {
+
                 var savedExp = [];
-                
                 data.allItems.exp.forEach((el) => {
-                    var obj = { ID: el.id, description: el.description, value: el.value, type: Type, };
+                 console.log(el.percentage)
+                    var obj = { ID: el.id, description: el.description, value: el.value, type: Type, percentage: el.percentage };
                     localStorage.removeItem('allItems.exp')
                     savedExp.push(obj)
                 })
@@ -176,31 +169,17 @@ var budgetController = (() => {
         },
 
         calculatePercentages: () => {
-
-            var expItems = JSON.parse(localStorage.getItem('allItems.exp'))
-            // if (expItems) {
-            //     var incTotals = JSON.parse(localStorage.getItem('totals.inc'))
-            //     expItems.forEach(function (curr) {
-            //         curr.calculatePercentages(incTotals)
-            //     })
-            // }else{
             data.allItems.exp.forEach(function (curr) {
+                console.log(curr)
+                console.log(data.totals.inc)
                 curr.calcPercentages(data.allItems.inc)
             })
-            // }
         },
 
         getPercentage: () => {
-            var expItems = JSON.parse(localStorage.getItem('allItems.exp'))
-            if (expItems) {
-                var allPerc = expItems.map(function (curr) {
-                    return curr.getPercentage()
-                })
-            } else {
-                var allPerc = data.allItems.exp.map(function (curr) {
-                    return curr.getPercentage()
-                })
-            }
+            var allPerc = data.allItems.exp.map(function (curr) {
+                return curr.getPercentage()
+            })
             return allPerc
         },
 
@@ -288,31 +267,29 @@ var UIController = (() => {
             newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml)
 
-            // types in local storage
-            var types = JSON.parse(localStorage.getItem('types')) || [];
-            types.push(type)
-            localStorage.setItem("types", JSON.stringify(types));
-
         },
 
         loadListItem: function (obj, type) {
             var html, newHtml, element;
-                if (type === 'inc') {
-                    element = DOMStrings.incomeContainer;
-                    html = `<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div>
+            if (type === 'inc') {
+                element = DOMStrings.incomeContainer;
+                html = `<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div>
                 <div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete">
                 <button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
-                } else if (type === 'exp') {
-                    element = DOMStrings.expenseContainer;
-                    html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
-                <div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div>
+            } else if (type === 'exp') {
+                element = DOMStrings.expenseContainer;
+                html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
+                <div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">%21%</div>
                 <div class="item__delete"><button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
-                }
-            obj.forEach(el => {
-                newHtml = html.replace('%id%', el.ID);
+            }
+            obj.forEach((el) => {
 
+                newHtml = html.replace('%id%', el.ID);
                 newHtml = newHtml.replace('%description%', el.description);
                 newHtml = newHtml.replace('%value%', formatNumber(el.value, type));
+
+                newHtml = newHtml.replace('%21%', el.percentage + '%');
+                console.log(el.percentage)
                 document.querySelector(element).insertAdjacentHTML('beforeend', newHtml)
             })
         },
@@ -430,7 +407,6 @@ var controller = ((budgetCtrl, UICtrl) => {
 
         // display in UI
         UICtrl.displayBudget(budget)
-
     };
 
     onReload = () => {
@@ -468,18 +444,16 @@ var controller = ((budgetCtrl, UICtrl) => {
 
             // local storage
             budgetCtrl.localDelete(type, ID)
-        
+
             // 2. delete item from UI
             UICtrl.deleteItem(itemID)
-            
+
             // 3. update and show the new budget
             updateBudget();
 
             // 4. calculate and update percentages
-            // updatePercentages();
-
+            updatePercentages();
         }
-
     }
 
 
@@ -506,9 +480,7 @@ var controller = ((budgetCtrl, UICtrl) => {
             updateBudget();
 
             // 6. calculate and update percentages
-            // updatePercentages();
-
-
+            updatePercentages();
         }
     }
 

@@ -15,12 +15,12 @@ var budgetController = (() => {
     //         this.percentage = -1;
     //     }
     // };
-    
-    
+
+
     // Expense.prototype.getPercentage = function() {
     //     return this.percentage;
     // };
-    
+
 
     class Expense {
         constructor(id, description, value, type) {
@@ -30,11 +30,10 @@ var budgetController = (() => {
             this.type = type;
             this.percentage = -1;
         }
-      calcPercentages(totalIncome) {
+        calcPercentages(totalIncome) {
             if (totalIncome > 0) {
                 this.percentage = Math.round((this.value / totalIncome) * 100);
-            }
-            else {
+            } else {
                 this.percentage = -1;
             }
         }
@@ -84,7 +83,7 @@ var budgetController = (() => {
         percentage: localPercentage ? localPercentage : -1
     }
     return {
-        addItem: function (type, description, value) {
+        addItem: function(type, description, value) {
             var newItem, ID;
 
             if (data.allItems[type].length > 0) {
@@ -101,7 +100,7 @@ var budgetController = (() => {
             return newItem;
         },
 
-        localAdd: function (Type) {
+        localAdd: function(Type) {
             onChangeExp = () => {
                 var savedExp = [];
                 data.allItems.exp.forEach((el) => {
@@ -128,11 +127,11 @@ var budgetController = (() => {
             }
         },
 
-        localDelete: function (type, id) {
+        localDelete: function(type, id) {
             var ids, index, saved;
             saved = JSON.parse(localStorage.getItem('allItems.' + type));
 
-            ids = saved.map(function (current) {
+            ids = saved.map(function(current) {
                 return current.ID
             });
             index = ids.indexOf(id)
@@ -143,10 +142,10 @@ var budgetController = (() => {
         },
 
 
-        deleteItem: function (type, id) {
+        deleteItem: function(type, id) {
             var ids, index;
 
-            ids = data.allItems[type].map(function (current) {
+            ids = data.allItems[type].map(function(current) {
                 return current.id
             })
             index = ids.indexOf(id)
@@ -155,7 +154,7 @@ var budgetController = (() => {
             }
         },
 
-        calculateBudget: function () {
+        calculateBudget: function() {
 
             // calculateTotals of income and expense
             calculateTotal('inc');
@@ -175,33 +174,33 @@ var budgetController = (() => {
         calculatePercentages: () => {
 
             var expItems = JSON.parse(localStorage.getItem('allItems.exp'))
-            // if (expItems) {
-            //     var incTotals = JSON.parse(localStorage.getItem('totals.inc'))
-            //     expItems.forEach(function (curr) {
-            //         curr.calculatePercentages(incTotals)
-            //     })
-            // }else{
-                data.allItems.exp.forEach(function (curr) {
+                // if (expItems) {
+                //     var incTotals = JSON.parse(localStorage.getItem('totals.inc'))
+                //     expItems.forEach(function (curr) {
+                //         curr.calculatePercentages(incTotals)
+                //     })
+                // }else{
+            data.allItems.exp.forEach(function(curr) {
                     curr.calcPercentages(data.allItems.inc)
                 })
-            // }
+                // }
         },
 
         getPercentage: () => {
             var expItems = JSON.parse(localStorage.getItem('allItems.exp'))
             if (expItems) {
-                var allPerc = expItems.map(function (curr) {
+                var allPerc = expItems.map(function(curr) {
                     return curr.getPercentage()
                 })
             } else {
-                var allPerc = data.allItems.exp.map(function (curr) {
+                var allPerc = data.allItems.exp.map(function(curr) {
                     return curr.getPercentage()
                 })
             }
             return allPerc
         },
 
-        getBudget: function () {
+        getBudget: function() {
             return {
                 budget: data.budget,
                 percentage: data.percentage,
@@ -265,7 +264,7 @@ var UIController = (() => {
                 value: parseFloat(document.querySelector(DOMStrings.inputValue).value)
             }
         },
-        addListItem: function (obj, type) {
+        addListItem: function(obj, type) {
             var html, newHtml, element, local;
             if (type === 'inc') {
                 element = DOMStrings.incomeContainer;
@@ -275,9 +274,10 @@ var UIController = (() => {
             } else if (type === 'exp') {
                 element = DOMStrings.expenseContainer;
                 html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
-                <div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div>
+                <div class="right clearfix"><div class="item__value">%value%</div>
                 <div class="item__delete"><button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
             }
+            // <div class="item__percentage">21%</div>
 
             newHtml = html.replace('%id%', obj.id);
 
@@ -285,13 +285,8 @@ var UIController = (() => {
             newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml)
 
-            // types in local storage
-            var types = JSON.parse(localStorage.getItem('types')) || [];
-            types.push(type)
-            localStorage.setItem("types", JSON.stringify(types));
-
         },
-        loadListItem: function (obj, type) {
+        loadListItem: function(obj, type) {
             var html, newHtml, element;
             if (type === 'inc') {
                 element = DOMStrings.incomeContainer;
@@ -302,9 +297,10 @@ var UIController = (() => {
                 console.log(type)
                 element = DOMStrings.expenseContainer;
                 html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div>
-                <div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div>
+                <div class="right clearfix"><div class="item__value">%value%</div>
                 <div class="item__delete"><button class="item__delete--btn"><i class="fa fa-close"></i></button></div></div></div>`
             }
+            // <div class="item__percentage">21%</div>
 
             obj.forEach(el => {
 
@@ -317,12 +313,12 @@ var UIController = (() => {
         },
 
 
-        deleteItem: function (itemID) {
+        deleteItem: function(itemID) {
             var el = document.getElementById(itemID);
             el.parentNode.removeChild(el)
         },
 
-        clearFields: function () {
+        clearFields: function() {
             document.querySelector(DOMStrings.inputDescription).value = "";
             document.querySelector(DOMStrings.inputValue).value = "";
             document.querySelector(DOMStrings.inputDescription).focus();
@@ -348,7 +344,7 @@ var UIController = (() => {
 
         },
 
-        displayPercentages: function (percentages) {
+        displayPercentages: function(percentages) {
             localStorage.setItem("expensesPercentages", JSON.stringify(percentages));
             saved = JSON.parse(localStorage.getItem('expensesPercentages'));
 
@@ -374,7 +370,7 @@ var UIController = (() => {
             document.querySelector(DOMStrings.month).textContent = date + ' ' + months[month] + ' ' + year
         },
 
-        changeType: function () {
+        changeType: function() {
             var fields = document.querySelectorAll(
                 DOMStrings.inputType + ',' +
                 DOMStrings.inputDescription + ',' +
@@ -419,7 +415,7 @@ var controller = ((budgetCtrl, UICtrl) => {
         // update UI with percentages
         UICtrl.displayPercentages(percentages)
     }
-    updateBudget = function () {
+    updateBudget = function() {
 
         // calculate budget
         budgetCtrl.calculateBudget()
@@ -432,7 +428,7 @@ var controller = ((budgetCtrl, UICtrl) => {
 
     };
 
-    var deleteItem = function (ev) {
+    var deleteItem = function(ev) {
         var itemID, splitID, type, ID;
 
         itemID = ev.target.parentNode.parentNode.parentNode.parentNode.id;
@@ -448,7 +444,7 @@ var controller = ((budgetCtrl, UICtrl) => {
 
             // 2. delete item from UI
             UICtrl.deleteItem(itemID)
-            // 3. update and show the new budget
+                // 3. update and show the new budget
             updateBudget();
 
             // 4. calculate and update percentages
@@ -477,7 +473,7 @@ var controller = ((budgetCtrl, UICtrl) => {
 
             // 3. Add item to UI
             addListItem = UICtrl.addListItem(newItem, input.type)
-            // 4. clear fields
+                // 4. clear fields
             UICtrl.clearFields()
 
             // 5. Calculate & update budget
